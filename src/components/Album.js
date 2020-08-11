@@ -11,10 +11,45 @@ class Album extends Component {
 
         this.state = {
 
-            album: album
+            album: album,
+            currentSong: album.songs[0],
+            isPlaying: false,
+            isHovered: false
         }
 
+        this.audioElement = document.createElement('audio');
+        this.audioElement.src = album.songs[0].audioSrc;
+
     }
+
+    play(){
+        this.audioElement.play();
+        this.setState({isPlaying: true});
+    }
+
+    pause(){
+        this.audioElement.pause();
+        this.setState({isPlaying: false});
+    }
+
+    setSong(song) {
+        this.audioElement.src = song.audioSrc;
+        this.setState({currentSong: song})
+
+    }
+
+    handleSongClick(song){
+        const isSameSong = this.state.currentSong === song;
+        if (this.state.isPlaying && isSameSong){
+            this.pause()
+        } else {
+            if (!isSameSong) {
+                this.setSong(song);
+            }
+            this.play()
+        }
+    }
+
     render() {
         return (
             <section className="album">
@@ -35,7 +70,19 @@ class Album extends Component {
                     <tbody>
                         {
                             this.state.album.songs.map( (song,index) =>
-                            <tr>
+                            <tr className="song" key={index} 
+                            onClick={() => this.handleSongClick(song)}
+                            onMouseEnter = {() => this.setState({isHovered: index + 1})}
+                            onMouseLeave = {() => this.setState({isHovered: false})}>
+                                <td className="songActions">
+                                    <button className="songNumber">
+                                    {
+                                        (this.state.currentSong == song && this.state.isPlaying) ? <ion-icon name={this.state.isPlaying ? "pause-outline": "play-outine"}></ion-icon>
+                                        :
+                                        (this.state.isHovered == index+1) ? <ion-icon name="play-outline"></ion-icon> : <span name="songNumber">{index+1}</span>
+                                    }
+                                    </button>
+                                </td>
                                 <td>{index+1}</td>
                                 <td>{song.title}</td>
                                 <td>{song.duration}</td>
